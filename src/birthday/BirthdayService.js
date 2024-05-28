@@ -6,16 +6,15 @@ export class BirthdayService {
   constructor() {}
 
   sendGreetings(ourDate, fileName, smtpUrl, smtpPort, transport) {
-    const data = fs.readFileSync(
-      path.resolve(__dirname, `${fileName}`), //`../${fileName}`),
+    const employeeDataFile = fs.readFileSync(
+      path.resolve(__dirname, `${fileName}`),
       "UTF-8"
     );
 
-    // split the contents by new line
-    const lines = data.split(/\r?\n/);
-    lines.shift();
-    const employees = lines
-      .map((line) => this.createEmployeeFromLine(line))
+    const employeeRecords = employeeDataFile.split(/\r?\n/);
+    employeeRecords.shift();
+    const employees = employeeRecords
+      .map((record) => this.createEmployeeFromLine(record))
       .filter((employee) => employee.isBirthday(ourDate));
 
     employees.forEach((employee) => {
