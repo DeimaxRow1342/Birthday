@@ -6,6 +6,13 @@ export class BirthdayService {
   constructor() {}
 
   sendGreetings(ourDate, fileName, smtpUrl, smtpPort, transport) {
+    const employees = this.loadEmployeesFromFile(fileName)
+      .filter((employee) => employee.isBirthday(ourDate));
+
+    this.sendBirthdayGreetings(employees, smtpUrl, smtpPort, transport);
+  }
+
+  loadEmployeesFromFile(fileName) {
     const employeeDataFile = fs.readFileSync(
       path.resolve(__dirname, `${fileName}`),
       "UTF-8"
@@ -13,10 +20,10 @@ export class BirthdayService {
 
     const employeeRecords = employeeDataFile.split(/\r?\n/);
     employeeRecords.shift();
-    const employees = employeeRecords
-      .map((record) => this.createEmployeeFromLine(record))
-      .filter((employee) => employee.isBirthday(ourDate));
+    return employeeRecords.map((record) => this.createEmployeeFromLine(record));
+  }
 
+  sendBirthdayGreetings(employees, smtpUrl, smtpPort, transport) {
     employees.forEach((employee) => {
       const message = {
         host: smtpUrl,
@@ -32,12 +39,11 @@ export class BirthdayService {
 
   createEmployeeFromLine(line) {
     const employeeData = line.split(", ");
-    const employee = new Employee(
+    return new Employee(
       employeeData[1],
       employeeData[0],
       employeeData[2],
       employeeData[3]
     );
-    return employee;
   }
 }
