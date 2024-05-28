@@ -3,18 +3,23 @@ import path from "path";
 import { Employee } from "./Employee";
 
 export class BirthdayService {
-  constructor() {}
-
-  sendGreetings(ourDate, fileName, smtpUrl, smtpPort, transport) {
-    const employees = this.loadEmployeesFromFile(fileName)
-      .filter((employee) => employee.isBirthday(ourDate));
-
-    this.sendBirthdayGreetings(employees, smtpUrl, smtpPort, transport);
+  constructor(fileName, smtpUrl, smtpPort, transport) {
+    this.fileName = fileName;
+    this.smtpUrl = smtpUrl;
+    this.smtpPort = smtpPort;
+    this.transport = transport;
   }
 
-  loadEmployeesFromFile(fileName) {
+  sendGreetings(ourDate) {
+    const employees = this.loadEmployeesFromFile()
+      .filter((employee) => employee.isBirthday(ourDate));
+
+    this.sendBirthdayGreetings(employees);
+  }
+
+  loadEmployeesFromFile() {
     const employeeDataFile = fs.readFileSync(
-      path.resolve(__dirname, `${fileName}`),
+      path.resolve(__dirname, `${this.fileName}`),
       "UTF-8"
     );
 
@@ -23,17 +28,17 @@ export class BirthdayService {
     return employeeRecords.map((record) => this.createEmployeeFromLine(record));
   }
 
-  sendBirthdayGreetings(employees, smtpUrl, smtpPort, transport) {
+  sendBirthdayGreetings(employees) {
     employees.forEach((employee) => {
       const message = {
-        host: smtpUrl,
-        port: smtpPort,
+        host: this.smtpUrl,
+        port: this.smtpPort,
         from: "sender@here.com",
         to: [employee.getEmail()],
         subject: "Happy Birthday!",
         text: `Happy Birthday, dear ${employee.getFirstName()}!`,
       };
-      transport.sendMail(message);
+      this.transport.sendMail(message);
     });
   }
 
